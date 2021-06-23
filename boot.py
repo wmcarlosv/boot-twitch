@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import WebDriverException
 import os
 import json
 import time
@@ -245,83 +246,92 @@ def setChannel(app, url, text):
 	app.close()
 	app.switch_to.window(app.window_handles[0])
 
-#Start Boot
-chromeOptions = webdriver.ChromeOptions()
-chromeOptions.add_extension(extension)
-#chromeOptions.add_argument('headless')
-chromeOptions.add_argument("--user-data-dir="+profile);
-
-app = webdriver.Chrome(chrome_options=chromeOptions)
-app.get(data['config']['url_inicial'])
+session_id = ''
 
 while reloadBoot == True:
-	time.sleep(data['config']['delays']['delay_general']);
-	#verify is login
-	is_avatar = False
-	try:
-		avatar = app.find_element(By.XPATH,'//*[@id="root"]/div/div[2]/nav/div/div[3]/div[6]/div/div/div/div/button/div/figure')
-		is_avatar = True
-	except NoSuchElementException:
-		is_avatar = False
 
-	if is_avatar == False:
+	if session_id == '':
 		#Start Boot
-		botonLogin = False
-		while botonLogin == False:
+		chromeOptions = webdriver.ChromeOptions()
+		chromeOptions.add_extension(extension)
+		#chromeOptions.add_argument('headless')
+		chromeOptions.add_argument("--user-data-dir="+profile);
 
-			try:
-				login_button = app.find_element(By.XPATH, '//*[@id="root"]/div/div[2]/nav/div/div[3]/div[3]/div/div[1]/div[1]/button')
-				login_button.click()
-				setLog("Click en el boton login")
-				botonLogin = True
-			except NoSuchElementException:
-				botonLogin = False
-				setLog("Esperando el boton login..")
+		app = webdriver.Chrome(options=chromeOptions)
+		app.get(data['config']['url_inicial'])
+		session_id = app.session_id
 
-			time.sleep(data['config']['delays']['delay_general']);
+	try:
+		time.sleep(data['config']['delays']['delay_general']);
+		#verify is login
+		is_avatar = False
+		try:
+			avatar = app.find_element(By.XPATH,'//*[@id="root"]/div/div[2]/nav/div/div[3]/div[6]/div/div/div/div/button/div/figure')
+			is_avatar = True
+		except NoSuchElementException:
+			is_avatar = False
 
-		login = False
+		if is_avatar == False:
+			#Start Boot
+			botonLogin = False
+			while botonLogin == False:
 
-		while login == False:
-			try:
-				user_name = app.find_element(By.XPATH,'//*[@id="login-username"]')
-				user_name.send_keys(data['config']['username'])
-				setLog("Enviando Usuario..")
+				try:
+					login_button = app.find_element(By.XPATH, '//*[@id="root"]/div/div[2]/nav/div/div[3]/div[3]/div/div[1]/div[1]/button')
+					login_button.click()
+					setLog("Click en el boton login")
+					botonLogin = True
+				except NoSuchElementException:
+					botonLogin = False
+					setLog("Esperando el boton login..")
+
+				time.sleep(data['config']['delays']['delay_general']);
+
+			login = False
+
+			while login == False:
+				try:
+					user_name = app.find_element(By.XPATH,'//*[@id="login-username"]')
+					user_name.send_keys(data['config']['username'])
+					setLog("Enviando Usuario..")
+					time.sleep(data['config']['delays']['delay_general'])
+
+					password = app.find_element(By.XPATH, '//*[@id="password-input"]')
+					password.send_keys(data['config']['password'])
+					setLog("Enviando Clave..")
+					time.sleep(data['config']['delays']['delay_general'])
+
+					setLogin = app.find_element(By.XPATH,'/html/body/div[3]/div/div/div/div/div/div[1]/div/div/div[3]/form/div/div[3]/button')
+					setLogin.click()
+					login = True
+					setLog("Iniciando Sesion..")
+
+
+				except NoSuchElementException:
+					setLog("Esperando formulario de inicio de sesion..")
+					login = False
+
+			ready = False
+			while ready == False:
+				try:
+					avatar = app.find_element(By.XPATH,'//*[@id="root"]/div/div[2]/nav/div/div[3]/div[6]/div/div/div/div/button/div/figure')
+					ready = True
+					setLog("Mostrando pantalla de bienvenida..")
+				except NoSuchElementException:
+					ready = False
+					setLog("Esperando que manualmente se inicie sesion..")
+
 				time.sleep(data['config']['delays']['delay_general'])
 
-				password = app.find_element(By.XPATH, '//*[@id="password-input"]')
-				password.send_keys(data['config']['password'])
-				setLog("Enviando Clave..")
-				time.sleep(data['config']['delays']['delay_general'])
-
-				setLogin = app.find_element(By.XPATH,'/html/body/div[3]/div/div/div/div/div/div[1]/div/div/div[3]/form/div/div[3]/button')
-				setLogin.click()
-				login = True
-				setLog("Iniciando Sesion..")
+			setScrolls()
+			setChannels(app)
+		else:
+			setScrolls()
+			setChannels(app)
 
 
-			except NoSuchElementException:
-				setLog("Esperando formulario de inicio de sesion..")
-				login = False
-
-		ready = False
-		while ready == False:
-			try:
-				avatar = app.find_element(By.XPATH,'//*[@id="root"]/div/div[2]/nav/div/div[3]/div[6]/div/div/div/div/button/div/figure')
-				ready = True
-				setLog("Mostrando pantalla de bienvenida..")
-			except NoSuchElementException:
-				ready = False
-				setLog("Esperando que manualmente se inicie sesion..")
-
-			time.sleep(data['config']['delays']['delay_general'])
-
-		setScrolls()
-		setChannels(app)
-	else:
-		setScrolls()
-		setChannels(app)
-
-
-	setLog("Refrescando la Pagina")
-	app.refresh()
+		setLog("Refrescando la Pagina")
+		app.refresh()
+	except WebDriverException:
+		setLog("Se detecto un cierre de ventana..")
+		session_id = ''
