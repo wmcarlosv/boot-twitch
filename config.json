@@ -1,0 +1,17 @@
+{
+  "config": {
+    "url_inicial": "https://www.twitch.tv/directory/all?sort=VIEWER_COUNT_ASC",
+    "username": "wmcarlosv",
+    "password": "Car2244los*",
+    "scrolling": 0,
+    "pausar_stream": 1,
+    "tipo_apertura":"browser",
+    "delays": {
+      "delay_por_mensaje": [5, 10],
+      "delay_por_stream": [5, 15],
+      "cantidad_de_canales_para_delay": 50,
+      "delay_visitar_cantidad_stream": [300, 600],
+      "delay_general":8
+    }
+  }
+}
