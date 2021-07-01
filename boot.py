@@ -333,5 +333,6 @@ while reloadBoot == True:
 		setLog("Refrescando la Pagina")
 		app.refresh()
 	except WebDriverException:
+		
 		setLog("Se detecto un cierre de ventana..")
 		session_id = ''
