@@ -247,7 +247,7 @@ def setChannel(app, url, text):
 	app.switch_to.window(app.window_handles[0])
 
 session_id = ''
-
+app = ''
 while reloadBoot == True:
 
 	if session_id == '':
@@ -258,6 +258,7 @@ while reloadBoot == True:
 		chromeOptions.add_argument("--user-data-dir="+profile);
 
 		app = webdriver.Chrome(options=chromeOptions)
+		app.maximize_window()
 		app.get(data['config']['url_inicial'])
 		session_id = app.session_id
 
@@ -265,11 +266,18 @@ while reloadBoot == True:
 		time.sleep(data['config']['delays']['delay_general']);
 		#verify is login
 		is_avatar = False
-		try:
-			avatar = app.find_element(By.XPATH,'//*[@id="root"]/div/div[2]/nav/div/div[3]/div[6]/div/div/div/div/button/div/figure')
-			is_avatar = True
-		except NoSuchElementException:
-			is_avatar = False
+		verifyInSession = 0
+
+		while verifyInSession < 5 and is_avatar == False:
+			time.sleep(data['config']['delays']['delay_general']);
+			try:
+				avatar = app.find_element(By.XPATH,'//*[@id="root"]/div/div[2]/nav/div/div[3]/div[6]/div/div/div/div/button/div/figure')
+				is_avatar = True
+			except NoSuchElementException:
+				is_avatar = False
+
+			verifyInSession = verifyInSession + 1
+			setLog("Verificando inicio de sesion "+str(verifyInSession))
 
 		if is_avatar == False:
 			#Start Boot
@@ -335,4 +343,6 @@ while reloadBoot == True:
 	except WebDriverException:
 		
 		setLog("Se detecto un cierre de ventana..")
+		app.quit()
 		session_id = ''
+		app = ''
