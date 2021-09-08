@@ -127,7 +127,7 @@ def setScrolls():
 	while scrolls <= int(data['config']['scrolling']):
 		time.sleep(data['config']['delays']['delay_general'])
 		setLog("Haciendo scroll: "+str(scrolls))
-		app.execute_script('document.getElementsByClassName("ScCoreLink-udwpw5-0")[document.getElementsByClassName("ScCoreLink-udwpw5-0").length - 1].focus()')
+		app.execute_script('document.getElementsByClassName("ScCoreLink-sc-udwpw5-0")[document.getElementsByClassName("ScCoreLink-sc-udwpw5-0").length - 1].focus()')
 		scrolls = scrolls + 1
 		time.sleep(data['config']['delays']['delay_general'])
 
